@@ -7,6 +7,7 @@ export const getRouter = () => {
 
   const router = createRouter({
     routeTree,
+    basepath: "/ashik-weds-thasleema/",
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
