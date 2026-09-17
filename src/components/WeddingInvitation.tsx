@@ -1,0 +1,396 @@
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  CalendarDays,
+  ChevronDown,
+  Clock3,
+  Download,
+  Heart,
+  MapPin,
+  Menu,
+  Music2,
+  Pause,
+  Sparkles,
+  X,
+} from "lucide-react";
+
+import coupleImage from "@/assets/wedding-couple.png";
+import floralCorner from "@/assets/floral-corner.png";
+import galleryFlowers from "@/assets/gallery-flowers.jpg";
+import galleryRings from "@/assets/gallery-rings.jpg";
+import galleryTextile from "@/assets/gallery-textile.jpg";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+const receptionDate = new Date("2026-11-29T11:30:00+05:30");
+const receptionMaps = "https://www.google.com/maps/search/?api=1&query=Zawaj+Capitol+Kallekad";
+const nikahMaps = "https://www.google.com/maps/search/?api=1&query=Crown+Palace+Kuzhalmannam";
+
+function Ornament({ label }: { label?: string }) {
+  return (
+    <div className="ornament" aria-hidden={label ? undefined : true}>
+      <span />
+      <Heart className="h-3.5 w-3.5 fill-current" />
+      <span />
+      {label && <span className="sr-only">{label}</span>}
+    </div>
+  );
+}
+
+function useCountdown() {
+  const calculate = () => {
+    const difference = Math.max(0, receptionDate.getTime() - Date.now());
+    return {
+      days: Math.floor(difference / 86_400_000),
+      hours: Math.floor((difference / 3_600_000) % 24),
+      minutes: Math.floor((difference / 60_000) % 60),
+      seconds: Math.floor((difference / 1_000) % 60),
+    };
+  };
+  const [time, setTime] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  useEffect(() => {
+    setTime(calculate());
+    const timer = window.setInterval(() => setTime(calculate()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  return time;
+}
+
+function Countdown() {
+  const time = useCountdown();
+  return (
+    <div className="countdown" aria-label="Countdown to the wedding reception">
+      {Object.entries(time).map(([label, value]) => (
+        <div key={label} className="countdown-item">
+          <strong>{String(value).padStart(2, "0")}</strong>
+          <span>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Opening({ onOpen }: { onOpen: () => void }) {
+  return (
+    <div className="opening" role="dialog" aria-modal="true" aria-label="Wedding invitation">
+      <img src={floralCorner} alt="" className="opening-floral" />
+      <div className="envelope">
+        <div className="envelope-flap" />
+        <div className="invitation-card">
+          <span className="eyebrow">29 · 11 · 2026</span>
+          <Heart className="seal-heart" aria-hidden="true" />
+          <h2>You Are Invited</h2>
+          <p>Ashik &amp; Thasleema</p>
+          <Button size="lg" onClick={onOpen} className="invitation-button">
+            Open Invitation
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Navigation() {
+  const [open, setOpen] = useState(false);
+  const links = [
+    ["Home", "#home"],
+    ["Details", "#details"],
+    ["Nikah", "#nikah"],
+    ["Reception", "#reception"],
+    ["RSVP", "#rsvp"],
+  ];
+  return (
+    <nav className="floating-nav" aria-label="Wedding invitation navigation">
+      <a href="#home" className="nav-monogram" aria-label="Ashik and Thasleema home">A <Heart /> T</a>
+      <div className="desktop-links">
+        {links.map(([name, href]) => <a key={href} href={href}>{name}</a>)}
+      </div>
+      <Button variant="ghost" size="icon" className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle menu">
+        {open ? <X /> : <Menu />}
+      </Button>
+      {open && (
+        <div className="mobile-links">
+          {links.map(([name, href]) => <a key={href} href={href} onClick={() => setOpen(false)}>{name}</a>)}
+        </div>
+      )}
+    </nav>
+  );
+}
+
+function Hero() {
+  return (
+    <header id="home" className="hero">
+      <img src={floralCorner} alt="" className="hero-floral hero-floral-left" />
+      <img src={floralCorner} alt="" className="hero-floral hero-floral-right" />
+      <div className="gold-arch" aria-hidden="true" />
+      <div className="hero-copy">
+        <p className="arabic" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+        <p className="blessing">Blessing From Aisha and Sulaiman</p>
+        <Ornament />
+        <p className="eyebrow">You are invited</p>
+        <h1><span>Ashik Ashraf</span><small>with</small><span>Thasleema M</span></h1>
+        <p className="script-title">Reception</p>
+        <p className="hero-date">Sunday · 29 November 2026</p>
+        <Countdown />
+        <Button asChild variant="outline" size="lg" className="view-button">
+          <a href="#details">View Invitation <ChevronDown /></a>
+        </Button>
+      </div>
+      <img src={coupleImage} width={896} height={1200} alt="Watercolor illustration of the bride and groom in sage and ivory wedding attire" className="couple-image" />
+    </header>
+  );
+}
+
+function SectionHeading({ eyebrow, children }: { eyebrow?: string; children: React.ReactNode }) {
+  return (
+    <div className="section-heading reveal">
+      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
+      <h2>{children}</h2>
+      <Ornament />
+    </div>
+  );
+}
+
+function FamilyDetails() {
+  return (
+    <section id="details" className="section family-section">
+      <img src={floralCorner} alt="" loading="lazy" className="section-floral section-floral-left" />
+      <div className="section-inner">
+        <SectionHeading eyebrow="Together with our families">With Joy in Our Hearts</SectionHeading>
+        <div className="family-grid reveal">
+          <article>
+            <h3>Ashik Ashraf</h3>
+            <p className="relation">S/o Mr. Ashraf.S &amp; Mrs. Sara.V</p>
+            <p>Aisha Manzil, Kanjiraparmbu,<br />Kavilpaad, Olavakkode</p>
+          </article>
+          <div className="and-mark">and</div>
+          <article>
+            <h3>Thasleema M</h3>
+            <p className="relation">D/o Mr. Muhammad musthafa A &amp;<br />Mrs. Nazeerabanu R (Late)</p>
+            <p>Puthan Kalam House,<br />Chithali</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function InfoItem({ icon: Icon, title, children }: { icon: typeof CalendarDays; title: string; children: React.ReactNode }) {
+  return (
+    <div className="info-item">
+      <Icon aria-hidden="true" />
+      <div><span>{title}</span><p>{children}</p></div>
+    </div>
+  );
+}
+
+function Reception() {
+  return (
+    <section id="reception" className="section reception-section">
+      <div className="section-inner reception-inner">
+        <SectionHeading eyebrow="The celebration">Reception</SectionHeading>
+        <div className="date-lockup reveal">
+          <span>Sunday</span>
+          <div><i>November</i><strong>29</strong><i>2026</i></div>
+          <p>11:30 AM to 2:30 PM</p>
+        </div>
+        <div className="details-row reveal">
+          <InfoItem icon={CalendarDays} title="Date">29 November 2026</InfoItem>
+          <InfoItem icon={Clock3} title="Time">11:30 AM – 2:30 PM</InfoItem>
+          <InfoItem icon={MapPin} title="Venue">Zawaj Capitol, Kallekad</InfoItem>
+        </div>
+        <Button asChild size="lg" className="gold-button"><a href={receptionMaps} target="_blank" rel="noreferrer"><MapPin /> Get Directions</a></Button>
+      </div>
+    </section>
+  );
+}
+
+function Nikah() {
+  return (
+    <section id="nikah" className="section nikah-section">
+      <img src={floralCorner} alt="" loading="lazy" className="section-floral section-floral-right" />
+      <div className="section-inner nikah-inner reveal">
+        <Sparkles className="nikah-icon" aria-hidden="true" />
+        <p className="eyebrow">The sacred union</p>
+        <h2>Nikah</h2>
+        <Ornament />
+        <h3>Crown Palace</h3>
+        <p>Kuzhalmannam</p>
+        <div className="nikah-date"><strong>28</strong><span>November 2026<br />11:30 AM – 12:00 PM</span></div>
+        <Button asChild variant="outline" size="lg"><a href={nikahMaps} target="_blank" rel="noreferrer"><MapPin /> View Location</a></Button>
+      </div>
+    </section>
+  );
+}
+
+function Timeline() {
+  return (
+    <section className="section timeline-section">
+      <div className="section-inner narrow">
+        <SectionHeading eyebrow="Two cherished moments">Our Celebration</SectionHeading>
+        <div className="timeline reveal">
+          <article><span className="timeline-dot" /><time>28 November 2026</time><h3>Nikah</h3><p>11:30 AM – 12:00 PM</p><small>Crown Palace, Kuzhalmannam</small></article>
+          <article><span className="timeline-dot" /><time>29 November 2026</time><h3>Wedding Reception</h3><p>11:30 AM – 2:30 PM</p><small>Zawaj Capitol, Kallekad</small></article>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CalendarOptions() {
+  const [open, setOpen] = useState(false);
+  const details = encodeURIComponent("Together with our families, we invite you to celebrate with us.");
+  const location = encodeURIComponent("Zawaj Capitol, Kallekad");
+  const title = encodeURIComponent("Ashik Ashraf & Thasleema M — Wedding Reception");
+  const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=20261129T060000Z/20261129T090000Z&details=${details}&location=${location}`;
+  const outlook = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&startdt=2026-11-29T11%3A30%3A00%2B05%3A30&enddt=2026-11-29T14%3A30%3A00%2B05%3A30&location=${location}&body=${details}`;
+  const downloadIcs = () => {
+    const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", "DTSTART:20261129T060000Z", "DTEND:20261129T090000Z", "SUMMARY:Ashik Ashraf & Thasleema M — Wedding Reception", "LOCATION:Zawaj Capitol, Kallekad", "DESCRIPTION:Together with our families, we invite you to celebrate with us.", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    const url = URL.createObjectURL(new Blob([body], { type: "text/calendar" }));
+    const anchor = document.createElement("a");
+    anchor.href = url; anchor.download = "ashik-thasleema-reception.ics"; anchor.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <div className="calendar-wrap">
+      <Button size="lg" onClick={() => setOpen(!open)} className="gold-button"><CalendarDays /> Add to Calendar</Button>
+      {open && <div className="calendar-menu"><a href={google} target="_blank" rel="noreferrer">Google Calendar</a><a href={outlook} target="_blank" rel="noreferrer">Outlook</a><button type="button" onClick={downloadIcs}><Download /> Apple / ICS</button></div>}
+    </div>
+  );
+}
+
+function VenueMap() {
+  return (
+    <section className="section venue-section">
+      <div className="section-inner">
+        <SectionHeading eyebrow="Find your way">Our Venues</SectionHeading>
+        <div className="venue-grid reveal">
+          <article>
+            <iframe title="Map of Zawaj Capitol, Kallekad" loading="lazy" src="https://www.google.com/maps?q=Zawaj%20Capitol%20Kallekad&output=embed" />
+            <div><span>Reception</span><h3>Zawaj Capitol</h3><p>Kallekad</p><a href={receptionMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
+          </article>
+          <article>
+            <iframe title="Map of Crown Palace, Kuzhalmannam" loading="lazy" src="https://www.google.com/maps?q=Crown%20Palace%20Kuzhalmannam&output=embed" />
+            <div><span>Nikah</span><h3>Crown Palace</h3><p>Kuzhalmannam</p><a href={nikahMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
+          </article>
+        </div>
+        <CalendarOptions />
+      </div>
+    </section>
+  );
+}
+
+function Quote() {
+  return (
+    <section className="quote-section section">
+      <img src={floralCorner} alt="" loading="lazy" className="quote-floral" />
+      <div className="reveal"><Ornament /><blockquote>“Together with our families, we invite you to share in the joy of our special day.”</blockquote><p>Ashik &amp; Thasleema</p></div>
+    </section>
+  );
+}
+
+const gallery = [
+  { src: galleryFlowers, alt: "Ivory roses, jasmine, eucalyptus and gold wedding ribbon", width: 1024, height: 1280 },
+  { src: galleryRings, alt: "Antique gold wedding rings with jasmine and eucalyptus", width: 1280, height: 1024 },
+  { src: galleryTextile, alt: "Sage and ivory bridal fabrics with intricate gold embroidery", width: 1024, height: 1280 },
+];
+
+function Gallery() {
+  const [selected, setSelected] = useState<(typeof gallery)[number] | null>(null);
+  return (
+    <section className="section gallery-section">
+      <div className="section-inner">
+        <SectionHeading eyebrow="A glimpse of what awaits">Moments of Love</SectionHeading>
+        <div className="gallery-grid reveal">
+          {gallery.map((image) => <button key={image.src} type="button" onClick={() => setSelected(image)} aria-label={`Enlarge ${image.alt}`}><img src={image.src} alt={image.alt} loading="lazy" width={image.width} height={image.height} /></button>)}
+        </div>
+      </div>
+      {selected && <div className="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged gallery image" onClick={() => setSelected(null)}><Button variant="ghost" size="icon" onClick={() => setSelected(null)} aria-label="Close gallery"><X /></Button><img src={selected.src} alt={selected.alt} /></div>}
+    </section>
+  );
+}
+
+function RSVP() {
+  const [attending, setAttending] = useState<"yes" | "no">("yes");
+  const [submitted, setSubmitted] = useState(false);
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    try { window.localStorage.setItem("ashik-thasleema-rsvp", JSON.stringify({ ...data, attending })); } catch { /* Confirmation still works when storage is unavailable. */ }
+    setSubmitted(true);
+  };
+  return (
+    <section id="rsvp" className="section rsvp-section">
+      <div className="section-inner narrow">
+        <SectionHeading eyebrow="Kindly respond">We Would Love to Celebrate With You</SectionHeading>
+        <p className="rsvp-intro">Your presence would make our celebration even more special.</p>
+        {submitted ? (
+          <div className="rsvp-success animate-scale-in" role="status"><Heart className="fill-current" /><h3>{attending === "yes" ? "We can’t wait to celebrate with you" : "You’ll be in our thoughts"}</h3><p>Thank you for letting us know.</p><Button variant="outline" onClick={() => setSubmitted(false)}>Update response</Button></div>
+        ) : (
+          <form className="rsvp-form reveal" onSubmit={submit}>
+            <label>Guest Name<Input name="name" required maxLength={100} placeholder="Your full name" /></label>
+            <label>Number of Guests<Input name="guests" type="number" required min={1} max={10} defaultValue={1} /></label>
+            <fieldset><legend>Will you be attending?</legend><div className="attending-choice"><button type="button" className={attending === "yes" ? "active" : ""} onClick={() => setAttending("yes")}><Heart /> Joyfully Accepting</button><button type="button" className={attending === "no" ? "active" : ""} onClick={() => setAttending("no")}><X /> Unable to Attend</button></div></fieldset>
+            <label>Message <span>(optional)</span><Textarea name="message" maxLength={500} rows={4} placeholder="Share a note for the couple" /></label>
+            <Button type="submit" size="lg" className="gold-button">Send RSVP <Heart /></Button>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function MusicPlayer() {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<{ context: AudioContext; oscillators: OscillatorNode[] } | null>(null);
+  const toggle = () => {
+    if (audioRef.current) {
+      audioRef.current.oscillators.forEach((oscillator) => oscillator.stop());
+      void audioRef.current.context.close();
+      audioRef.current = null; setPlaying(false); return;
+    }
+    const AudioContextClass = window.AudioContext;
+    if (!AudioContextClass) return;
+    const context = new AudioContextClass();
+    const gain = context.createGain();
+    gain.gain.value = 0.018; gain.connect(context.destination);
+    const oscillators = [261.63, 329.63, 392].map((frequency) => {
+      const oscillator = context.createOscillator(); oscillator.type = "sine"; oscillator.frequency.value = frequency; oscillator.connect(gain); oscillator.start(); return oscillator;
+    });
+    audioRef.current = { context, oscillators }; setPlaying(true);
+  };
+  useEffect(() => () => { audioRef.current?.oscillators.forEach((oscillator) => oscillator.stop()); void audioRef.current?.context.close(); }, []);
+  return <Button size="icon" onClick={toggle} className={`music-button ${playing ? "playing" : ""}`} aria-label={playing ? "Pause ambient music" : "Play ambient music"}>{playing ? <Pause /> : <Music2 />}</Button>;
+}
+
+function Footer() {
+  return <footer><Ornament /><p>With love,</p><h2>Ashik &amp; Thasleema</h2><time>29 November 2026</time></footer>;
+}
+
+export function WeddingInvitation() {
+  const [opened, setOpened] = useState(false);
+  useEffect(() => {
+    const nodes = document.querySelectorAll(".reveal");
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("revealed")), { threshold: 0.12 });
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, [opened]);
+  const opening = useMemo(() => !opened && <Opening onOpen={() => setOpened(true)} />, [opened]);
+  return (
+    <main className={opened ? "invitation-open" : "invitation-closed"}>
+      {opening}
+      <Navigation />
+      <Hero />
+      <FamilyDetails />
+      <Nikah />
+      <Reception />
+      <Timeline />
+      <VenueMap />
+      <Quote />
+      <Gallery />
+      <RSVP />
+      <Footer />
+      <MusicPlayer />
+    </main>
+  );
+}
