@@ -1454,16 +1454,6 @@ footer time {
     opacity: .9;
   }
 
-  .hero-floral {
-    transform: translateY(calc(var(--scroll-y, 0px) * -0.15)) rotate(var(--base-rotation, 3deg));
-    will-change: transform;
-  }
-
-  .section-floral {
-    transform: translateY(calc(var(--scroll-y, 0px) * -0.08)) rotate(var(--base-rotation, -15deg));
-    will-change: transform;
-  }
-
   .hero-floral-right {
     top: -5rem;
     right: -8rem;
@@ -1594,11 +1584,13 @@ footer time {
 
 /* --- 4. SCROLL-DRIVEN PARALLAX --- */
 .hero-floral {
-  transform: rotate(var(--base-rotation, 3deg));
+  transform: translateY(calc(var(--scroll-y, 0px) * -0.15)) rotate(var(--base-rotation, 3deg));
+  will-change: transform;
 }
 
 .section-floral {
-  transform: rotate(var(--base-rotation, -15deg));
+  transform: translateY(calc(var(--scroll-y, 0px) * -0.08)) rotate(var(--base-rotation, -15deg));
+  will-change: transform;
 }
 
 .hero-floral-left {
