@@ -12,6 +12,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import Lenis from "lenis";
 
 import coupleImage from "@/assets/wedding-couple.png";
 import floralCorner from "@/assets/floral-corner.png";
@@ -124,13 +125,32 @@ function Navigation() {
           {links.map(([name, href]) => <a key={href} href={href} onClick={(e) => handleScroll(e, href)}>{name}</a>)}
         </div>
       )}
+      <div className="scroll-progress" aria-hidden="true" />
     </nav>
+  );
+}
+
+function Particles() {
+  const particles = Array.from({ length: 6 }).map((_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    duration: `${15 + Math.random() * 10}s`,
+    delay: `${Math.random() * 5}s`,
+    size: `${3 + Math.random() * 6}px`
+  }));
+  return (
+    <div className="particles-container" aria-hidden="true">
+      {particles.map(p => (
+        <div key={p.id} className="particle" style={{ left: p.left, width: p.size, height: p.size, "--duration": p.duration, "--delay": p.delay } as React.CSSProperties} />
+      ))}
+    </div>
   );
 }
 
 function Hero() {
   return (
     <header id="home" className="hero">
+      <Particles />
       <img src={floralCorner} alt="" className="hero-floral hero-floral-left" />
       <img src={floralCorner} alt="" className="hero-floral hero-floral-right" />
       <div className="gold-arch" aria-hidden="true" />
@@ -168,14 +188,14 @@ function FamilyDetails() {
       <img src={floralCorner} alt="" loading="lazy" className="section-floral section-floral-left" />
       <div className="section-inner">
         <SectionHeading eyebrow="Together with our families">With Joy in Our Hearts</SectionHeading>
-        <div className="family-grid reveal">
-          <article>
+        <div className="family-grid reveal-group">
+          <article className="reveal-child">
             <h3>Ashik Ashraf</h3>
             <p className="relation">S/o Mr. Ashraf.S &amp; Mrs. Sara.V</p>
             <p>Aisha Manzil, Kanjiraparmbu,<br />Kavilpaad, Olavakkode</p>
           </article>
-          <div className="and-mark">and</div>
-          <article>
+          <div className="and-mark reveal-child">and</div>
+          <article className="reveal-child">
             <h3>Thasleema M</h3>
             <p className="relation">D/o Mr. Muhammad musthafa A &amp;<br />Mrs. Nazeerabanu R (Late)</p>
             <p>Puthan Kalam House,<br />Chithali</p>
@@ -239,9 +259,9 @@ function Timeline() {
     <section className="section timeline-section">
       <div className="section-inner narrow">
         <SectionHeading eyebrow="Two cherished moments">Our Celebration</SectionHeading>
-        <div className="timeline reveal">
-          <article><span className="timeline-dot" /><time>28 November 2026</time><h3>Nikah</h3><p>11:30 AM – 12:00 PM</p><small>Crown Palace, Kuzhalmannam</small></article>
-          <article><span className="timeline-dot" /><time>29 November 2026</time><h3>Wedding Reception</h3><p>11:30 AM – 2:30 PM</p><small>Zawaj Capitol, Kallekad</small></article>
+        <div className="timeline reveal-group">
+          <article className="reveal-child"><span className="timeline-dot" /><time>28 November 2026</time><h3>Nikah</h3><p>11:30 AM – 12:00 PM</p><small>Crown Palace, Kuzhalmannam</small></article>
+          <article className="reveal-child"><span className="timeline-dot" /><time>29 November 2026</time><h3>Wedding Reception</h3><p>11:30 AM – 2:30 PM</p><small>Zawaj Capitol, Kallekad</small></article>
         </div>
       </div>
     </section>
@@ -275,12 +295,12 @@ function VenueMap() {
     <section className="section venue-section">
       <div className="section-inner">
         <SectionHeading eyebrow="Find your way">Our Venues</SectionHeading>
-        <div className="venue-grid reveal">
-          <article>
+        <div className="venue-grid reveal-group">
+          <article className="reveal-child">
             <iframe title="Map of Zawaj Capitol, Kallekad" loading="lazy" src="https://www.google.com/maps?q=Zawaj%20Capitol%20Kallekad&output=embed" />
             <div><span>Reception</span><h3>Zawaj Capitol</h3><p>Kallekad</p><a href={receptionMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
           </article>
-          <article>
+          <article className="reveal-child">
             <iframe title="Map of Crown Palace, Kuzhalmannam" loading="lazy" src="https://www.google.com/maps?q=Crown%20Palace%20Kuzhalmannam&output=embed" />
             <div><span>Nikah</span><h3>Crown Palace</h3><p>Kuzhalmannam</p><a href={nikahMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
           </article>
@@ -312,8 +332,8 @@ function Gallery() {
     <section className="section gallery-section">
       <div className="section-inner">
         <SectionHeading eyebrow="A glimpse of what awaits">Moments of Love</SectionHeading>
-        <div className="gallery-grid reveal">
-          {gallery.map((image) => <button key={image.src} type="button" onClick={() => setSelected(image)} aria-label={`Enlarge ${image.alt}`}><img src={image.src} alt={image.alt} loading="lazy" width={image.width} height={image.height} /></button>)}
+        <div className="gallery-grid reveal-group">
+          {gallery.map((image) => <button key={image.src} type="button" className="reveal-child" onClick={() => setSelected(image)} aria-label={`Enlarge ${image.alt}`}><img src={image.src} alt={image.alt} loading="lazy" width={image.width} height={image.height} /></button>)}
         </div>
       </div>
       {selected && <div className="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged gallery image" onClick={() => setSelected(null)}><Button variant="ghost" size="icon" onClick={() => setSelected(null)} aria-label="Close gallery"><X /></Button><img src={selected.src} alt={selected.alt} /></div>}
@@ -390,10 +410,39 @@ export function WeddingInvitation() {
   };
 
   useEffect(() => {
-    const nodes = document.querySelectorAll(".reveal");
-    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("revealed")), { threshold: 0.12 });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          const children = Array.from(entry.target.querySelectorAll(".reveal-child"));
+          children.forEach((child, index) => {
+            (child as HTMLElement).style.transitionDelay = `${index * 120}ms`;
+            child.classList.add("revealed");
+          });
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" });
+
+    const nodes = document.querySelectorAll(".reveal, .reveal-group, .reveal-scale");
     nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+      document.documentElement.style.setProperty("--scroll-y", `${scrollY}px`);
+      document.documentElement.style.setProperty("--scroll-progress", `${progress}%`);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    const lenis = new Lenis({ autoRaf: true });
+    
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+      lenis.destroy();
+    };
   }, [opened]);
   const opening = useMemo(() => !opened && <Opening onOpen={handleOpen} isOpening={isOpening} />, [opened, isOpening]);
   return (

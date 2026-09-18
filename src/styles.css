@@ -108,6 +108,64 @@ body::before {
   background-image: radial-gradient(circle at 20% 10%, color-mix(in oklab, var(--gold-soft) 18%, transparent), transparent 32%), linear-gradient(110deg, transparent 48%, color-mix(in oklab, var(--sage) 5%, transparent) 50%, transparent 52%);
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  animation: grain 8s steps(10) infinite;
+}
+
+@keyframes grain {
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  10% {
+    transform: translate(-5%, -10%);
+  }
+
+  20% {
+    transform: translate(-15%, 5%);
+  }
+
+  30% {
+    transform: translate(7%, -25%);
+  }
+
+  40% {
+    transform: translate(-5%, 25%);
+  }
+
+  50% {
+    transform: translate(-15%, 10%);
+  }
+
+  60% {
+    transform: translate(15%, 0%);
+  }
+
+  70% {
+    transform: translate(0%, 15%);
+  }
+
+  80% {
+    transform: translate(3%, 35%);
+  }
+
+  90% {
+    transform: translate(-10%, 10%);
+  }
+}
+
 .invitation-closed {
   height: 100vh;
   overflow: hidden;
@@ -219,18 +277,20 @@ body::before {
 .floating-nav {
   position: fixed;
   z-index: 50;
-  top: 1rem;
+  top: 1.5rem;
   left: 50%;
   display: grid;
   width: min(calc(100% - 2rem), 70rem);
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   padding: .55rem .65rem .55rem 1rem;
-  border: 1px solid color-mix(in oklab, var(--gold) 30%, transparent);
-  border-radius: 2rem;
-  background: color-mix(in oklab, var(--background) 88%, transparent);
-  box-shadow: 0 10px 30px color-mix(in oklab, var(--sage-deep) 10%, transparent);
-  backdrop-filter: blur(14px);
+  background: color-mix(in oklab, var(--background) 70%, transparent);
+  backdrop-filter: blur(25px) saturate(200%);
+  -webkit-backdrop-filter: blur(25px) saturate(200%);
+  border: 1px solid color-mix(in oklab, var(--gold-soft) 40%, transparent);
+  border-top: 1px solid color-mix(in oklab, var(--gold-soft) 80%, transparent);
+  border-radius: 3rem;
+  box-shadow: 0 15px 35px -5px color-mix(in oklab, var(--sage-deep) 15%, transparent), inset 0 1px 0 color-mix(in oklab, #ffffff 40%, transparent);
   transform: translateX(-50%);
 }
 
@@ -948,11 +1008,13 @@ body::before {
   display: grid;
   gap: 1.25rem;
   padding: clamp(1.3rem, 4vw, 2.5rem);
-  border: 1px solid var(--gold-soft);
+  border: 1px solid color-mix(in oklab, var(--gold-soft) 30%, transparent);
   border-radius: var(--radius-lg);
-  background: color-mix(in oklab, var(--card) 92%, transparent);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   text-align: left;
-  box-shadow: 0 18px 50px color-mix(in oklab, var(--sage-deep) 9%, transparent);
+  box-shadow: 0 25px 50px -12px color-mix(in oklab, var(--sage-deep) 20%, transparent), inset 0 1px 1px color-mix(in oklab, #ffffff 50%, transparent);
 }
 
 .rsvp-form label,
@@ -1392,5 +1454,204 @@ footer time {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* --- 1. PREMIUM EASING & VARIABLES --- */
+:root {
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.25);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* --- 2. MICRO-INTERACTIONS & BUTTONS --- */
+.gold-button,
+.view-button,
+.invitation-button {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo);
+  transform: translateZ(0);
+}
+
+.gold-button:hover,
+.view-button:hover,
+.invitation-button:hover {
+  transform: scale(1.03) translateY(-2px);
+  box-shadow: 0 15px 30px color-mix(in oklab, var(--sage-deep) 20%, transparent);
+}
+
+.gold-button::after,
+.view-button::after,
+.invitation-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary-foreground) 40%, transparent), transparent);
+  transform: skewX(-20deg);
+  transition: none;
+}
+
+.gold-button:hover::after,
+.view-button:hover::after,
+.invitation-button:hover::after {
+  animation: shine-sweep 1s var(--ease-out-expo) forwards;
+}
+
+@keyframes shine-sweep {
+  100% {
+    left: 150%;
+  }
+}
+
+/* Premium Desktop Nav Underlines */
+.desktop-links a::after {
+  transform-origin: center right;
+  transition: transform 0.5s var(--ease-out-expo), opacity 0.5s var(--ease-out-expo);
+}
+
+.desktop-links a:hover::after {
+  transform-origin: center left;
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* Scroll Progress Bar */
+.scroll-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--gold);
+  width: var(--scroll-progress, 0%);
+  transition: width 0.1s linear;
+}
+
+/* --- 3. ENVELOPE 3D SEQUENCE --- */
+.envelope {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.envelope-flap {
+  transform-origin: top;
+  animation: flap 1.5s 0.8s var(--ease-in-out-expo) both;
+}
+
+.invitation-card {
+  transform-style: preserve-3d;
+  animation: card-rise 1.5s 1.2s var(--ease-out-expo) both;
+}
+
+.seal-heart {
+  animation: wax-seal-pop 1s 0.2s var(--ease-spring) both;
+}
+
+@keyframes wax-seal-pop {
+  0% {
+    transform: scale(1) translateZ(0);
+  }
+
+  40% {
+    transform: scale(0.9) translateZ(-10px);
+    color: var(--gold-soft);
+  }
+
+  100% {
+    transform: scale(1.1) translateZ(20px);
+    opacity: 0;
+  }
+}
+
+/* --- 4. SCROLL-DRIVEN PARALLAX --- */
+.hero-floral {
+  transform: translateY(calc(var(--scroll-y, 0px) * -0.15)) rotate(var(--base-rotation, 3deg));
+  will-change: transform;
+}
+
+.section-floral {
+  transform: translateY(calc(var(--scroll-y, 0px) * -0.08)) rotate(var(--base-rotation, -15deg));
+  will-change: transform;
+}
+
+.hero-floral-left {
+  --base-rotation: 3deg;
+}
+
+.hero-floral-right {
+  --base-rotation: 91deg;
+}
+
+.section-floral-left {
+  --base-rotation: -15deg;
+}
+
+.section-floral-right {
+  --base-rotation: 100deg;
+}
+
+/* --- 5. STAGGERED REVEALS --- */
+.reveal,
+.reveal-child {
+  opacity: 0;
+  transform: translateY(2.5rem);
+  transition: opacity 1.2s var(--ease-out-quint), transform 1.2s var(--ease-out-quint);
+  will-change: opacity, transform;
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 1.2s var(--ease-out-quint), transform 1.2s var(--ease-out-quint);
+}
+
+.reveal.revealed,
+.reveal-child.revealed,
+.reveal-scale.revealed {
+  opacity: 1;
+  transform: translate(0) scale(1);
+}
+
+/* --- 6. ATMOSPHERIC PARTICLES --- */
+.particles-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: color-mix(in oklab, var(--gold-soft) 30%, transparent);
+  border-radius: 50%;
+  animation: float-particle var(--duration) linear infinite;
+  animation-delay: var(--delay);
+  left: var(--left);
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(110vh) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(80vh) scale(1) rotate(45deg);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateY(20vh) scale(1) rotate(135deg);
+  }
+
+  100% {
+    transform: translateY(-10vh) scale(0.5) rotate(180deg);
+    opacity: 0;
   }
 }
