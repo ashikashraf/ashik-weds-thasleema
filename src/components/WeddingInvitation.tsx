@@ -527,21 +527,18 @@ export function WeddingInvitation() {
     const nodes = document.querySelectorAll(".reveal, .reveal-group, .reveal-scale");
     nodes.forEach((node) => observer.observe(node));
 
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
+    const lenis = new Lenis({ autoRaf: true });
+
+    lenis.on("scroll", (e: any) => {
+      const scrollY = e.animatedScroll;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
       document.documentElement.style.setProperty("--scroll-y", `${scrollY}px`);
       document.documentElement.style.setProperty("--scroll-progress", `${progress}%`);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    const lenis = new Lenis({ autoRaf: true });
+    });
     
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
       lenis.destroy();
     };
   }, [opened]);
