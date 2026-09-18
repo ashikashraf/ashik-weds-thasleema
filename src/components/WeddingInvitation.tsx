@@ -125,7 +125,6 @@ function Navigation() {
           {links.map(([name, href]) => <a key={href} href={href} onClick={(e) => handleScroll(e, href)}>{name}</a>)}
         </div>
       )}
-      <div className="scroll-progress" aria-hidden="true" />
     </nav>
   );
 }
