@@ -138,17 +138,18 @@ function Navigation() {
 }
 
 function Particles() {
-  const particles = Array.from({ length: 6 }).map((_, i) => ({
+  const particles = Array.from({ length: 8 }).map((_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
-    duration: `${15 + Math.random() * 10}s`,
-    delay: `${Math.random() * 5}s`,
-    size: `${3 + Math.random() * 6}px`
+    duration: `${10 + Math.random() * 15}s`,
+    delay: `-${Math.random() * 20}s`,
+    size: `${8 + Math.random() * 10}px`,
+    rotation: `${Math.random() * 360}deg`
   }));
   return (
     <div className="particles-container" aria-hidden="true">
       {particles.map(p => (
-        <div key={p.id} className="particle" style={{ left: p.left, width: p.size, height: p.size, "--duration": p.duration, "--delay": p.delay } as React.CSSProperties} />
+        <div key={p.id} className="particle" style={{ left: p.left, width: p.size, height: p.size, "--duration": p.duration, "--delay": p.delay, "--start-rot": p.rotation } as React.CSSProperties} />
       ))}
     </div>
   );
@@ -512,6 +513,13 @@ export function WeddingInvitation() {
           children.forEach((child, index) => {
             (child as HTMLElement).style.transitionDelay = `${index * 120}ms`;
             child.classList.add("revealed");
+          });
+        } else {
+          entry.target.classList.remove("revealed");
+          const children = Array.from(entry.target.querySelectorAll(".reveal-child"));
+          children.forEach((child) => {
+            (child as HTMLElement).style.transitionDelay = "0ms";
+            child.classList.remove("revealed");
           });
         }
       });
