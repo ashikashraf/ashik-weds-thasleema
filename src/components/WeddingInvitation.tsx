@@ -57,13 +57,21 @@ function useCountdown() {
   return time;
 }
 
+function RollingDigit({ value }: { value: number }) {
+  return (
+    <span key={value} className="rolling-digit inline-block">
+      {String(value).padStart(2, "0")}
+    </span>
+  );
+}
+
 function Countdown() {
   const time = useCountdown();
   return (
     <div className="countdown" aria-label="Countdown to the wedding reception">
       {Object.entries(time).map(([label, value]) => (
         <div key={label} className="countdown-item">
-          <strong>{String(value).padStart(2, "0")}</strong>
+          <strong><RollingDigit value={value} /></strong>
           <span>{label}</span>
         </div>
       ))}
