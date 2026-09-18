@@ -289,20 +289,21 @@ body::before {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 7rem 1rem 24rem;
+  padding: 7rem 1rem clamp(15rem, 30vh, 24rem);
   isolation: isolate;
+  scroll-margin-top: 5rem;
 }
 
 .gold-arch {
   position: absolute;
   z-index: -1;
   top: 1.7rem;
+  bottom: 0;
   left: 50%;
   width: min(92vw, 65rem);
-  height: 74rem;
   border: 1px solid var(--gold);
   border-bottom: 0;
-  border-radius: 50% 50% 0 0;
+  border-radius: min(46vw, 32.5rem) min(46vw, 32.5rem) 0 0;
   transform: translateX(-50%);
   opacity: .65;
 }
@@ -416,13 +417,13 @@ body::before {
 }
 
 .countdown-item strong {
-  font: 500 1.45rem var(--font-serif);
+  font: 500 clamp(1.1rem, 4.5vw, 1.45rem) var(--font-serif);
   font-variant-numeric: tabular-nums;
 }
 
 .countdown-item span {
   color: var(--muted-foreground);
-  font: 500 .52rem var(--font-sans);
+  font: 500 clamp(0.45rem, 1.8vw, 0.52rem) var(--font-sans);
   letter-spacing: .1em;
   text-transform: uppercase;
 }
@@ -468,6 +469,7 @@ body::before {
   position: relative;
   padding: 6rem 1.25rem;
   overflow: hidden;
+  scroll-margin-top: 5rem;
 }
 
 .section-inner {
@@ -614,19 +616,19 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: clamp(0.25rem, 2vw, 1rem);
   margin: .5rem 0;
 }
 
 .date-lockup strong {
-  font: 500 6.5rem/1 var(--font-serif);
+  font: 500 clamp(4.5rem, 15vw, 6.5rem)/1 var(--font-serif);
 }
 
 .date-lockup i {
-  min-width: 5.5rem;
+  min-width: clamp(4.5rem, 12vw, 5.5rem);
   padding-block: .4rem;
   border-block: 1px solid var(--gold);
-  font: 400 1rem var(--font-serif);
+  font: 400 clamp(0.75rem, 2.5vw, 1rem) var(--font-serif);
   text-transform: uppercase;
 }
 
@@ -1357,19 +1359,16 @@ footer time {
     font-size: clamp(3.7rem, 4.8vw, 5.7rem);
   }
 
-  .hero-floral-left {
-    z-index: 0;
-    opacity: .9;
-  }
-
   .couple-image {
     right: 1vw;
     width: min(44vw, 38rem);
   }
 
   .hero-floral-left {
-    left: -9rem;
-    bottom: -4rem;
+    left: -14rem;
+    bottom: -6rem;
+    z-index: 0;
+    opacity: .9;
   }
 
   .gold-arch {
