@@ -163,8 +163,7 @@ function Hero() {
       <img src={floralCorner} alt="" className="hero-floral hero-floral-right" />
       <div className="gold-arch" aria-hidden="true" />
       <div className="hero-copy">
-        <p className="arabic" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
-        <p className="blessing">Blessing From Aisha and Sulaiman</p>
+        <p className="hero-quote">"Two souls, one heart, beginning a beautiful journey together."</p>
         <Ornament />
         <p className="eyebrow">You are invited</p>
         <h1><span>Ashik Ashraf</span><small>with</small><span>Thasleema M</span></h1>

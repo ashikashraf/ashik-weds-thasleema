@@ -407,10 +407,10 @@ body::after {
   animation: hero-in 1.5s .2s ease both;
 }
 
-.arabic {
+.hero-quote {
   margin: 0 0 .5rem;
   color: var(--sage-deep);
-  font: 500 clamp(2rem, 8vw, 4rem)/1.35 "Noto Naskh Arabic", serif;
+  font: italic 500 clamp(1.2rem, 3vw, 1.4rem) var(--font-serif);
 }
 
 .blessing {
