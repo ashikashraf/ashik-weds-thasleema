@@ -92,25 +92,36 @@ function Opening({ onOpen, isOpening }: { onOpen: () => void; isOpening?: boolea
 
 function Navigation() {
   const [open, setOpen] = useState(false);
-  const links = [
+  const links: [string, string][] = [
     ["Home", "#home"],
     ["Details", "#details"],
     ["Nikah", "#nikah"],
     ["Reception", "#reception"],
     ["RSVP", "#rsvp"],
   ];
+
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const targetId = href.replace("#", "");
+    const element = document.getElementById(targetId);
+    if (element) {
+      setOpen(false);
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <nav className="floating-nav" aria-label="Wedding invitation navigation">
-      <a href="#home" className="nav-monogram" aria-label="Ashik and Thasleema home">A <Heart /> T</a>
+      <a href="#home" className="nav-monogram" aria-label="Ashik and Thasleema home" onClick={(e) => handleScroll(e, "#home")}>A <Heart /> T</a>
       <div className="desktop-links">
-        {links.map(([name, href]) => <a key={href} href={href}>{name}</a>)}
+        {links.map(([name, href]) => <a key={href} href={href} onClick={(e) => handleScroll(e, href)}>{name}</a>)}
       </div>
       <Button variant="ghost" size="icon" className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle menu">
         {open ? <X /> : <Menu />}
       </Button>
       {open && (
         <div className="mobile-links">
-          {links.map(([name, href]) => <a key={href} href={href} onClick={() => setOpen(false)}>{name}</a>)}
+          {links.map(([name, href]) => <a key={href} href={href} onClick={(e) => handleScroll(e, href)}>{name}</a>)}
         </div>
       )}
     </nav>
