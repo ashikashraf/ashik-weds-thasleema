@@ -176,7 +176,17 @@ function SectionHeading({ eyebrow, children }: { eyebrow?: string; children: Rea
   return (
     <div className="section-heading reveal">
       {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-      <h2>{children}</h2>
+      <h2 className="reveal-group">
+        {typeof children === "string" ? (
+          children.split(' ').map((word, i) => (
+            <span key={i} className="inline-block overflow-hidden mr-[0.25em] align-bottom pb-2">
+              <span className="split-word reveal-child">{word}</span>
+            </span>
+          ))
+        ) : (
+          children
+        )}
+      </h2>
       <Ornament />
     </div>
   );
@@ -326,6 +336,28 @@ const gallery = [
   { src: galleryTextile, alt: "Sage and ivory bridal fabrics with intricate gold embroidery", width: 1024, height: 1280 },
 ];
 
+function TiltCard({ image, onClick }: { image: any; onClick: () => void }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -8;
+    const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 8;
+    ref.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+  };
+  const handleMouseLeave = () => {
+    if (!ref.current) return;
+    ref.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+  };
+  return (
+    <button ref={ref} type="button" className="reveal-child tilt-card" onClick={onClick} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave} aria-label={`Enlarge ${image.alt}`}>
+      <img src={image.src} alt={image.alt} loading="lazy" width={image.width} height={image.height} />
+    </button>
+  );
+}
+
 function Gallery() {
   const [selected, setSelected] = useState<(typeof gallery)[number] | null>(null);
   return (
@@ -333,7 +365,7 @@ function Gallery() {
       <div className="section-inner">
         <SectionHeading eyebrow="A glimpse of what awaits">Moments of Love</SectionHeading>
         <div className="gallery-grid reveal-group">
-          {gallery.map((image) => <button key={image.src} type="button" className="reveal-child" onClick={() => setSelected(image)} aria-label={`Enlarge ${image.alt}`}><img src={image.src} alt={image.alt} loading="lazy" width={image.width} height={image.height} /></button>)}
+          {gallery.map((image) => <TiltCard key={image.src} image={image} onClick={() => setSelected(image)} />)}
         </div>
       </div>
       {selected && <div className="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged gallery image" onClick={() => setSelected(null)}><Button variant="ghost" size="icon" onClick={() => setSelected(null)} aria-label="Close gallery"><X /></Button><img src={selected.src} alt={selected.alt} /></div>}
@@ -398,6 +430,61 @@ function Footer() {
   return <footer><Ornament /><p>With love,</p><h2>Ashik &amp; Thasleema</h2><time>29 November 2026</time></footer>;
 }
 
+function Cursor() {
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let cursorX = mouseX;
+    let cursorY = mouseY;
+    let animationFrame: number;
+
+    const onMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+    const onMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("button") || target.closest("a") || target.closest("input") || target.closest("textarea")) {
+        cursorRef.current?.classList.add("cursor-hover");
+      } else {
+        cursorRef.current?.classList.remove("cursor-hover");
+      }
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseover", onMouseOver);
+
+    const render = () => {
+      cursorX += (mouseX - cursorX) * 0.15;
+      cursorY += (mouseY - cursorY) * 0.15;
+      if (cursorRef.current && dotRef.current) {
+        cursorRef.current.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
+        dotRef.current.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+      }
+      animationFrame = requestAnimationFrame(render);
+    };
+    animationFrame = requestAnimationFrame(render);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseover", onMouseOver);
+      cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
+  return (
+    <>
+      <div ref={cursorRef} className="custom-cursor-ring" aria-hidden="true" />
+      <div ref={dotRef} className="custom-cursor-dot" aria-hidden="true" />
+    </>
+  );
+}
+
 export function WeddingInvitation() {
   const [opened, setOpened] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
@@ -447,6 +534,7 @@ export function WeddingInvitation() {
   const opening = useMemo(() => !opened && <Opening onOpen={handleOpen} isOpening={isOpening} />, [opened, isOpening]);
   return (
     <main className={opened ? "invitation-open" : "invitation-closed"}>
+      <Cursor />
       {opening}
       <Navigation />
       <Hero />

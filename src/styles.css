@@ -1616,6 +1616,27 @@ footer time {
   transform: translate(0) scale(1);
 }
 
+/* Kinetic Split Text */
+.split-word {
+  transform: translateY(110%);
+  opacity: 0;
+  transition: transform 1.2s var(--ease-out-expo), opacity 1.2s var(--ease-out-expo);
+  will-change: transform, opacity;
+  display: inline-block;
+}
+
+.split-word.revealed {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 3D Gallery Tilt */
+.tilt-card {
+  transition: transform 0.4s var(--ease-out-expo);
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
 /* --- 6. ATMOSPHERIC PARTICLES --- */
 .particles-container {
   position: absolute;
@@ -1652,6 +1673,65 @@ footer time {
 
   100% {
     transform: translateY(-10vh) scale(0.5) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+/* --- 7. CUSTOM MAGNETIC CURSOR --- */
+@media (pointer: fine) {
+
+  /* Only apply custom cursor on non-touch devices */
+  body,
+  button,
+  a,
+  input,
+  textarea {
+    cursor: none !important;
+  }
+
+  .custom-cursor-dot,
+  .custom-cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 99999;
+    border-radius: 50%;
+  }
+
+  .custom-cursor-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    margin-left: -3px;
+    margin-top: -3px;
+    transition: opacity 0.2s var(--ease-out-expo);
+  }
+
+  .custom-cursor-ring {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--gold);
+    margin-left: -18px;
+    margin-top: -18px;
+    transition: width 0.4s var(--ease-out-expo),
+      height 0.4s var(--ease-out-expo),
+      margin-left 0.4s var(--ease-out-expo),
+      margin-top 0.4s var(--ease-out-expo),
+      background-color 0.4s var(--ease-out-expo);
+    will-change: transform, width, height;
+  }
+
+  .custom-cursor-ring.cursor-hover {
+    width: 60px;
+    height: 60px;
+    margin-left: -30px;
+    margin-top: -30px;
+    background-color: color-mix(in oklab, var(--gold) 15%, transparent);
+    border-color: color-mix(in oklab, var(--gold) 40%, transparent);
+  }
+
+  .custom-cursor-ring.cursor-hover+.custom-cursor-dot {
     opacity: 0;
   }
 }
