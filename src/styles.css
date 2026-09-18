@@ -524,14 +524,14 @@ body::after {
 }
 
 .hero-floral-left {
-  left: -8rem;
+  left: -4rem;
   bottom: 3rem;
   transform: rotate(3deg);
 }
 
 .hero-floral-right {
-  top: -5rem;
-  right: -8rem;
+  top: -2rem;
+  right: -2.5rem;
   transform: rotate(91deg);
 }
 
@@ -1452,6 +1452,11 @@ footer time {
     bottom: -6rem;
     z-index: 0;
     opacity: .9;
+  }
+
+  .hero-floral-right {
+    top: -5rem;
+    right: -8rem;
   }
 
   .gold-arch {
