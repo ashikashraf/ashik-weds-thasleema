@@ -70,9 +70,9 @@ function Countdown() {
   );
 }
 
-function Opening({ onOpen }: { onOpen: () => void }) {
+function Opening({ onOpen, isOpening }: { onOpen: () => void; isOpening?: boolean }) {
   return (
-    <div className="opening" role="dialog" aria-modal="true" aria-label="Wedding invitation">
+    <div className={`opening ${isOpening ? "is-opening-out" : ""}`} role="dialog" aria-modal="true" aria-label="Wedding invitation">
       <img src={floralCorner} alt="" className="opening-floral" />
       <div className="envelope">
         <div className="envelope-flap" />
@@ -369,13 +369,22 @@ function Footer() {
 
 export function WeddingInvitation() {
   const [opened, setOpened] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
+
+  const handleOpen = () => {
+    setIsOpening(true);
+    setTimeout(() => {
+      setOpened(true);
+    }, 1300); // 1.3 seconds matches the new animation timing
+  };
+
   useEffect(() => {
     const nodes = document.querySelectorAll(".reveal");
     const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("revealed")), { threshold: 0.12 });
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
   }, [opened]);
-  const opening = useMemo(() => !opened && <Opening onOpen={() => setOpened(true)} />, [opened]);
+  const opening = useMemo(() => !opened && <Opening onOpen={handleOpen} isOpening={isOpening} />, [opened, isOpening]);
   return (
     <main className={opened ? "invitation-open" : "invitation-closed"}>
       {opening}
