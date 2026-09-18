@@ -403,6 +403,7 @@ body::after {
   z-index: 3;
   width: 85vw;
   max-width: 46rem;
+  margin-top: clamp(2rem, 5vh, 4rem);
   text-align: center;
   animation: hero-in 1.5s .2s ease both;
 }
