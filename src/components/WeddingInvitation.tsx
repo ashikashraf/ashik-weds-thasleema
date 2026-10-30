@@ -635,6 +635,8 @@ async function generateWishCardImage(data: {
 }
 
 function Wishes() {
+  const [guestName, setGuestName] = useState("");
+  const [guestWish, setGuestWish] = useState("");
   const [submittedData, setSubmittedData] = useState<{
     name: string;
     wish: string;
@@ -644,12 +646,18 @@ function Wishes() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const handleSendAnotherWish = () => {
+    setSubmittedData(null);
+    setLoading(false);
+    setErrorMessage(null);
+    setGuestName("");
+    setGuestWish("");
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const name = String(formData.get("name") || "").trim();
-    const wish = String(formData.get("wish") || "").trim();
+    const name = guestName.trim();
+    const wish = guestWish.trim();
 
     if (!name || !wish) return;
 
@@ -767,18 +775,16 @@ function Wishes() {
 
             <div className="mt-4">
               <Button
+                type="button"
                 variant="outline"
-                onClick={() => {
-                  setSubmittedData(null);
-                  setErrorMessage(null);
-                }}
+                onClick={handleSendAnotherWish}
               >
                 Send Another Wish
               </Button>
             </div>
           </div>
         ) : (
-          <form className="rsvp-form reveal" onSubmit={submit}>
+          <form className="rsvp-form" onSubmit={submit}>
             {errorMessage && (
               <div
                 className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md"
@@ -791,6 +797,8 @@ function Wishes() {
               Guest Name
               <Input
                 name="name"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
                 required
                 maxLength={100}
                 placeholder="Your full name"
@@ -801,6 +809,8 @@ function Wishes() {
               Your Wish
               <Textarea
                 name="wish"
+                value={guestWish}
+                onChange={(e) => setGuestWish(e.target.value)}
                 required
                 maxLength={500}
                 rows={4}
