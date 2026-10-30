@@ -366,52 +366,109 @@ function Gallery() {
   );
 }
 
+function loadCanvasImage(src: string): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
 async function generateWishCardImage(data: {
   name: string;
   wish: string;
 }): Promise<string> {
   const canvas = document.createElement("canvas");
   const width = 1000;
-  const height = 1350;
+  const height = 1420;
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) return "";
 
-  // 1. Rich dark royal emerald & sage background
-  const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-  bgGrad.addColorStop(0, "#132820");
-  bgGrad.addColorStop(0.5, "#0b1a14");
-  bgGrad.addColorStop(1, "#060f0c");
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, width, height);
+  // 1. Preload moments assets
+  const [ringsImg, floralImg] = await Promise.all([
+    loadCanvasImage(galleryRings),
+    loadCanvasImage(floralCorner),
+  ]);
 
-  // Subtle decorative radial glow
+  // 2. Background: Moments of Love (Rings & Jasmine) with royal emerald overlay
+  if (ringsImg) {
+    const scale = Math.max(width / ringsImg.width, height / ringsImg.height);
+    const sw = width / scale;
+    const sh = height / scale;
+    const sx = (ringsImg.width - sw) / 2;
+    const sy = (ringsImg.height - sh) / 2;
+    ctx.drawImage(ringsImg, sx, sy, sw, sh, 0, 0, width, height);
+
+    // Opulent deep emerald overlay allowing the gold rings & jasmine texture to shine softly
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bgGrad.addColorStop(0, "rgba(18, 38, 30, 0.88)");
+    bgGrad.addColorStop(0.3, "rgba(10, 24, 18, 0.90)");
+    bgGrad.addColorStop(0.65, "rgba(7, 16, 12, 0.94)");
+    bgGrad.addColorStop(1, "rgba(4, 10, 8, 0.97)");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, width, height);
+  } else {
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, "#132820");
+    bgGrad.addColorStop(0.5, "#0b1a14");
+    bgGrad.addColorStop(1, "#060f0c");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  // Soft golden radial starlight glow in center
   const glow = ctx.createRadialGradient(
     width / 2,
-    height * 0.4,
+    height * 0.45,
     60,
     width / 2,
-    height * 0.4,
+    height * 0.45,
     550
   );
-  glow.addColorStop(0, "rgba(212, 175, 55, 0.12)");
+  glow.addColorStop(0, "rgba(212, 175, 55, 0.15)");
   glow.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, width, height);
 
-  // 2. Ornate Golden Borders
-  // Outer Border
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.55)";
+  // 3. Delicate Floral Corners (using moments floralCorner)
+  if (floralImg) {
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    ctx.drawImage(floralImg, 32, 32, 190, 190);
+    ctx.translate(width - 32, 32);
+    ctx.scale(-1, 1);
+    ctx.drawImage(floralImg, 0, 0, 190, 190);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.translate(32, height - 32);
+    ctx.scale(1, -1);
+    ctx.drawImage(floralImg, 0, 0, 170, 170);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.translate(width - 32, height - 32);
+    ctx.scale(-1, -1);
+    ctx.drawImage(floralImg, 0, 0, 170, 170);
+    ctx.restore();
+  }
+
+  // 4. Double Golden Border
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.6)";
   ctx.lineWidth = 3;
   ctx.strokeRect(36, 36, width - 72, height - 72);
 
-  // Inner Border
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.3)";
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.35)";
   ctx.lineWidth = 1;
   ctx.strokeRect(48, 48, width - 96, height - 96);
 
-  // Corner Diamond Ornaments
+  // Corner Diamond Accents
   const corners: [number, number][] = [
     [48, 48],
     [width - 48, 48],
@@ -425,49 +482,68 @@ async function generateWishCardImage(data: {
     ctx.fill();
   });
 
-  // 3. Header: Wedding Monogram & Title
+  // 5. Header: Wedding Monogram & Title
   ctx.textAlign = "center";
   ctx.fillStyle = "#d4af37";
-  ctx.font = "600 16px 'Montserrat', sans-serif";
-  ctx.fillText("WEDDING CELEBRATION", width / 2, 110);
+  ctx.font = "600 15px 'Montserrat', sans-serif";
+  ctx.fillText("WEDDING CELEBRATION", width / 2, 98);
 
   // Couple Names
   ctx.fillStyle = "#ffffff";
-  ctx.font = "italic 50px 'Playfair Display', Georgia, serif";
-  ctx.fillText("Ashik & Thasleema", width / 2, 175);
+  ctx.font = "italic 48px 'Playfair Display', Georgia, serif";
+  ctx.fillText("Ashik & Thasleema", width / 2, 155);
 
-  // Decorative divider with heart
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(width / 2 - 160, 210);
-  ctx.lineTo(width / 2 - 30, 210);
-  ctx.moveTo(width / 2 + 30, 210);
-  ctx.lineTo(width / 2 + 160, 210);
-  ctx.stroke();
+  // 6. Featured Moments Cameo Medallion (Rings & Jasmine)
+  const cameoY = 245;
+  const cameoR = 60;
+  if (ringsImg) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(width / 2, cameoY, cameoR, 0, Math.PI * 2);
+    ctx.clip();
 
-  ctx.fillStyle = "#d4af37";
-  ctx.font = "20px 'Segoe UI Emoji', sans-serif";
-  ctx.fillText("♥", width / 2, 217);
+    const cScale = Math.max((cameoR * 2) / ringsImg.width, (cameoR * 2) / ringsImg.height);
+    const cW = ringsImg.width * cScale;
+    const cH = ringsImg.height * cScale;
+    ctx.drawImage(ringsImg, width / 2 - cW / 2, cameoY - cH / 2, cW, cH);
+    ctx.restore();
+
+    ctx.strokeStyle = "#d4af37";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(width / 2, cameoY, cameoR + 2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(255, 235, 175, 0.6)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(width / 2, cameoY, cameoR + 6, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = "#d4af37";
+    ctx.font = "14px 'Montserrat', sans-serif";
+    ctx.fillText("✦", width / 2 - cameoR - 22, cameoY + 5);
+    ctx.fillText("✦", width / 2 + cameoR + 22, cameoY + 5);
+  }
 
   // Section Subtitle
-  ctx.fillStyle = "rgba(243, 229, 171, 0.85)";
-  ctx.font = "500 19px 'Montserrat', sans-serif";
-  ctx.fillText("HEARTFELT BLESSINGS & WISHES", width / 2, 268);
+  ctx.fillStyle = "rgba(243, 229, 171, 0.9)";
+  ctx.font = "500 18px 'Montserrat', sans-serif";
+  ctx.fillText("HEARTFELT BLESSINGS & WISHES", width / 2, 345);
 
-  // 4. Frosted Glass Wish Card Container
-  const boxX = 90;
-  const boxY = 310;
-  const boxW = width - 180;
-  const boxH = 700;
+  // 7. Frosted Glass Wish Card Container
+  const boxX = 85;
+  const boxY = 380;
+  const boxW = width - 170;
+  const boxH = 750;
   const radius = 24;
 
   ctx.save();
   ctx.beginPath();
   ctx.roundRect(boxX, boxY, boxW, boxH, radius);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.055)";
   ctx.fill();
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.45)";
   ctx.lineWidth = 1.5;
   ctx.stroke();
   ctx.restore();
@@ -475,9 +551,9 @@ async function generateWishCardImage(data: {
   // Quotation Marks
   ctx.fillStyle = "rgba(212, 175, 55, 0.28)";
   ctx.font = "italic 110px 'Playfair Display', Georgia, serif";
-  ctx.fillText("“", boxX + 60, boxY + 100);
+  ctx.fillText("“", boxX + 60, boxY + 95);
 
-  // 5. Draw Word-Wrapped Wish Content
+  // 8. Draw Word-Wrapped Wish Content
   const wishText = data.wish.trim();
   let fontSize = 32;
   let lineHeight = 48;
@@ -489,7 +565,7 @@ async function generateWishCardImage(data: {
     lineHeight = 42;
   }
 
-  ctx.fillStyle = "#f8f5ee";
+  ctx.fillStyle = "#fffbf2";
   ctx.font = `italic ${fontSize}px 'Playfair Display', Georgia, serif`;
 
   const maxTextWidth = boxW - 140;
@@ -516,7 +592,7 @@ async function generateWishCardImage(data: {
   }
 
   const textBlockHeight = displayLines.length * lineHeight;
-  const textStartY = boxY + 125 + Math.max(0, (330 - textBlockHeight) / 2);
+  const textStartY = boxY + 130 + Math.max(0, (350 - textBlockHeight) / 2);
 
   displayLines.forEach((line, idx) => {
     ctx.fillText(line, width / 2, textStartY + idx * lineHeight);
@@ -524,36 +600,36 @@ async function generateWishCardImage(data: {
 
   ctx.fillStyle = "rgba(212, 175, 55, 0.28)";
   ctx.font = "italic 110px 'Playfair Display', Georgia, serif";
-  ctx.fillText("”", width - boxX - 60, boxY + 450);
+  ctx.fillText("”", width - boxX - 60, boxY + 490);
 
   // Inner Divider
-  ctx.strokeStyle = "rgba(212, 175, 55, 0.25)";
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.3)";
   ctx.beginPath();
-  ctx.moveTo(width / 2 - 120, boxY + boxH - 180);
-  ctx.lineTo(width / 2 + 120, boxY + boxH - 180);
+  ctx.moveTo(width / 2 - 130, boxY + boxH - 180);
+  ctx.lineTo(width / 2 + 130, boxY + boxH - 180);
   ctx.stroke();
 
   // Guest Name Badge
-  ctx.fillStyle = "rgba(212, 175, 55, 0.75)";
+  ctx.fillStyle = "rgba(212, 175, 55, 0.8)";
   ctx.font = "500 16px 'Montserrat', sans-serif";
   ctx.fillText("WITH LOVE & PRAYERS FROM", width / 2, boxY + boxH - 130);
 
-  ctx.fillStyle = "#e5c365";
-  ctx.font = "600 36px 'Playfair Display', Georgia, serif";
+  ctx.fillStyle = "#f5d378";
+  ctx.font = "600 38px 'Playfair Display', Georgia, serif";
   ctx.fillText(data.name.trim(), width / 2, boxY + boxH - 75);
 
-  // 6. Footer (Date & Location watermark)
+  // 9. Footer (Date & Location watermark)
   ctx.fillStyle = "rgba(212, 175, 55, 0.85)";
   ctx.font = "600 17px 'Montserrat', sans-serif";
-  ctx.fillText("SUNDAY · 29 NOVEMBER 2026", width / 2, height - 155);
+  ctx.fillText("SUNDAY · 29 NOVEMBER 2026", width / 2, height - 130);
 
-  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
   ctx.font = "16px 'Montserrat', sans-serif";
-  ctx.fillText("Zawaj Capitol, Kallekad, Palakkad", width / 2, height - 120);
+  ctx.fillText("Zawaj Capitol, Kallekad, Palakkad", width / 2, height - 95);
 
   ctx.fillStyle = "rgba(212, 175, 55, 0.4)";
   ctx.font = "13px 'Montserrat', sans-serif";
-  ctx.fillText("ashik-weds-thasleema", width / 2, height - 85);
+  ctx.fillText("ashik-weds-thasleema", width / 2, height - 65);
 
   return canvas.toDataURL("image/png");
 }
@@ -610,7 +686,7 @@ function Wishes() {
         /* Local storage fallback */
       }
 
-      // 3. Generate beautiful visual wish card
+      // 3. Generate beautiful visual wish card with Moments assets
       const cardImageUrl = await generateWishCardImage({ name, wish });
 
       // 4. WhatsApp share URL to +91 9633596679
@@ -644,7 +720,13 @@ function Wishes() {
 
   return (
     <section id="wishes" className="section rsvp-section wishes-section">
+      <img src={floralCorner} alt="" loading="lazy" className="section-floral section-floral-left" />
+      <img src={floralCorner} alt="" loading="lazy" className="section-floral section-floral-right" />
       <div className="section-inner narrow">
+        <div className="wishes-moments-pill reveal">
+          <img src={galleryRings} alt="Wedding Rings" />
+          <span>Moments of Love &amp; Blessings</span>
+        </div>
         <SectionHeading eyebrow="Send Your Blessings">Wishes &amp; Blessings</SectionHeading>
         <p className="rsvp-intro">Your warm wishes, prayers, and heartfelt blessings mean the world to us.</p>
         {submittedData ? (

@@ -1125,6 +1125,39 @@ body::after {
   margin: 0 0 1rem;
 }
 
+.wishes-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.wishes-moments-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.35rem 1.1rem 0.35rem 0.35rem;
+  margin: 0 auto 1.5rem;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--card) 85%, transparent);
+  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  box-shadow: 0 8px 24px -5px color-mix(in oklab, var(--sage-deep) 15%, transparent);
+}
+
+.wishes-moments-pill img {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 1px solid var(--gold);
+}
+
+.wishes-moments-pill span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sage-deep);
+}
+
 .wish-card-container {
   width: 100%;
   max-width: 24rem;
