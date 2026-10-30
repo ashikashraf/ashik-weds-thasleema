@@ -828,6 +828,11 @@ body::after {
   gap: 1.5rem;
 }
 
+.venue-grid.single-venue {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
 .venue-grid article {
   overflow: hidden;
   text-align: left;
@@ -1118,6 +1123,103 @@ body::after {
 
 .rsvp-success p {
   margin: 0 0 1rem;
+}
+
+.wish-card-container {
+  width: 100%;
+  max-width: 24rem;
+  margin: 1.5rem auto;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px color-mix(in oklab, var(--sage-deep) 35%, transparent), 0 0 25px color-mix(in oklab, var(--gold) 20%, transparent);
+  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.wish-card-container:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 30px 70px -15px color-mix(in oklab, var(--sage-deep) 45%, transparent), 0 0 35px color-mix(in oklab, var(--gold) 35%, transparent);
+}
+
+.wish-card-container img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wish-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 32rem;
+  margin: 1.5rem auto 1rem;
+}
+
+@media (min-width: 640px) {
+  .wish-actions-group {
+    flex-direction: row;
+  }
+}
+
+.whatsapp-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  background: #25d366;
+  text-decoration: none;
+  box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.4);
+  transition: all 0.25s ease;
+}
+
+.whatsapp-action-btn:hover {
+  background: #20ba5a;
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 30px -5px rgba(37, 211, 102, 0.55);
+}
+
+.whatsapp-action-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.download-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.85rem 1.4rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--sage-deep);
+  background: var(--gold-soft);
+  text-decoration: none;
+  border: 1px solid var(--gold);
+  box-shadow: 0 8px 20px -5px color-mix(in oklab, var(--gold) 35%, transparent);
+  transition: all 0.25s ease;
+}
+
+.download-action-btn:hover {
+  background: var(--gold);
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.03);
+}
+
+.download-action-btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
 }
 
 footer {
@@ -1412,7 +1514,7 @@ footer time {
     padding: 0 2rem;
   }
 
-  .venue-grid {
+  .venue-grid:not(.single-venue) {
     grid-template-columns: repeat(2, 1fr);
   }
 

@@ -5,8 +5,10 @@ import {
   Clock3,
   Download,
   Heart,
+  Loader2,
   MapPin,
   Menu,
+  MessageCircle,
   Music2,
   Pause,
   Sparkles,
@@ -22,10 +24,10 @@ import galleryTextile from "@/assets/gallery-textile.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/lib/supabase";
 
 const receptionDate = new Date("2026-11-29T11:30:00+05:30");
 const receptionMaps = "https://www.google.com/maps/search/?api=1&query=Zawaj+Capitol+Kallekad";
-const nikahMaps = "https://www.google.com/maps/search/?api=1&query=Crown+Palace+Kuzhalmannam";
 
 function Ornament({ label }: { label?: string }) {
   return (
@@ -106,7 +108,8 @@ function Navigation() {
     ["Details", "#details"],
     ["Nikah", "#nikah"],
     ["Reception", "#reception"],
-    ["RSVP", "#rsvp"],
+    ["Location", "#location"],
+    ["Wishes", "#wishes"],
   ];
 
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -265,7 +268,6 @@ function Nikah() {
         <h3>Crown Palace</h3>
         <p>Kuzhalmannam</p>
         <div className="nikah-date"><strong>28</strong><span>November 2026<br />11:30 AM – 12:00 PM</span></div>
-        <Button asChild variant="outline" size="lg"><a href={nikahMaps} target="_blank" rel="noreferrer"><MapPin /> View Location</a></Button>
       </div>
     </section>
   );
@@ -285,44 +287,28 @@ function Timeline() {
   );
 }
 
-function CalendarOptions() {
-  const [open, setOpen] = useState(false);
-  const details = encodeURIComponent("Together with our families, we invite you to celebrate with us.");
-  const location = encodeURIComponent("Zawaj Capitol, Kallekad");
-  const title = encodeURIComponent("Ashik Ashraf & Thasleema M — Wedding Reception");
-  const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=20261129T060000Z/20261129T090000Z&details=${details}&location=${location}`;
-  const outlook = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&startdt=2026-11-29T11%3A30%3A00%2B05%3A30&enddt=2026-11-29T14%3A30%3A00%2B05%3A30&location=${location}&body=${details}`;
-  const downloadIcs = () => {
-    const body = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", "DTSTART:20261129T060000Z", "DTEND:20261129T090000Z", "SUMMARY:Ashik Ashraf & Thasleema M — Wedding Reception", "LOCATION:Zawaj Capitol, Kallekad", "DESCRIPTION:Together with our families, we invite you to celebrate with us.", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
-    const url = URL.createObjectURL(new Blob([body], { type: "text/calendar" }));
-    const anchor = document.createElement("a");
-    anchor.href = url; anchor.download = "ashik-thasleema-reception.ics"; anchor.click();
-    URL.revokeObjectURL(url);
-  };
+function LocationRouteMap() {
   return (
-    <div className="calendar-wrap">
-      <Button size="lg" onClick={() => setOpen(!open)} className="gold-button"><CalendarDays /> Add to Calendar</Button>
-      {open && <div className="calendar-menu"><a href={google} target="_blank" rel="noreferrer">Google Calendar</a><a href={outlook} target="_blank" rel="noreferrer">Outlook</a><button type="button" onClick={downloadIcs}><Download /> Apple / ICS</button></div>}
-    </div>
-  );
-}
-
-function VenueMap() {
-  return (
-    <section className="section venue-section">
+    <section id="location" className="section venue-section">
       <div className="section-inner">
-        <SectionHeading eyebrow="Find your way">Our Venues</SectionHeading>
-        <div className="venue-grid reveal-group">
+        <SectionHeading eyebrow="Directions & Route">Location Route Map</SectionHeading>
+        <div className="venue-grid single-venue reveal-group">
           <article className="reveal-child">
-            <iframe title="Map of Zawaj Capitol, Kallekad" loading="lazy" src="https://www.google.com/maps?q=Zawaj%20Capitol%20Kallekad&output=embed" />
-            <div><span>Reception</span><h3>Zawaj Capitol</h3><p>Kallekad</p><a href={receptionMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
-          </article>
-          <article className="reveal-child">
-            <iframe title="Map of Crown Palace, Kuzhalmannam" loading="lazy" src="https://www.google.com/maps?q=Crown%20Palace%20Kuzhalmannam&output=embed" />
-            <div><span>Nikah</span><h3>Crown Palace</h3><p>Kuzhalmannam</p><a href={nikahMaps} target="_blank" rel="noreferrer">Get Directions <MapPin /></a></div>
+            <iframe
+              title="Route Map for Zawaj Capitol, Kallekad"
+              loading="lazy"
+              src="https://www.google.com/maps?q=Zawaj%20Capitol%20Kallekad&output=embed"
+            />
+            <div>
+              <span>Reception Route</span>
+              <h3>Zawaj Capitol</h3>
+              <p>Kallekad</p>
+              <a href={receptionMaps} target="_blank" rel="noreferrer">
+                Get Directions <MapPin />
+              </a>
+            </div>
           </article>
         </div>
-        <CalendarOptions />
       </div>
     </section>
   );
@@ -380,29 +366,382 @@ function Gallery() {
   );
 }
 
-function RSVP() {
-  const [attending, setAttending] = useState<"yes" | "no">("yes");
-  const [submitted, setSubmitted] = useState(false);
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+async function generateWishCardImage(data: {
+  name: string;
+  wish: string;
+}): Promise<string> {
+  const canvas = document.createElement("canvas");
+  const width = 1000;
+  const height = 1350;
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
+
+  // 1. Rich dark royal emerald & sage background
+  const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+  bgGrad.addColorStop(0, "#132820");
+  bgGrad.addColorStop(0.5, "#0b1a14");
+  bgGrad.addColorStop(1, "#060f0c");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, width, height);
+
+  // Subtle decorative radial glow
+  const glow = ctx.createRadialGradient(
+    width / 2,
+    height * 0.4,
+    60,
+    width / 2,
+    height * 0.4,
+    550
+  );
+  glow.addColorStop(0, "rgba(212, 175, 55, 0.12)");
+  glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, height);
+
+  // 2. Ornate Golden Borders
+  // Outer Border
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.55)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(36, 36, width - 72, height - 72);
+
+  // Inner Border
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.3)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(48, 48, width - 96, height - 96);
+
+  // Corner Diamond Ornaments
+  const corners: [number, number][] = [
+    [48, 48],
+    [width - 48, 48],
+    [48, height - 48],
+    [width - 48, height - 48],
+  ];
+  ctx.fillStyle = "#d4af37";
+  corners.forEach(([cx, cy]) => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 3. Header: Wedding Monogram & Title
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#d4af37";
+  ctx.font = "600 16px 'Montserrat', sans-serif";
+  ctx.fillText("WEDDING CELEBRATION", width / 2, 110);
+
+  // Couple Names
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "italic 50px 'Playfair Display', Georgia, serif";
+  ctx.fillText("Ashik & Thasleema", width / 2, 175);
+
+  // Decorative divider with heart
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(width / 2 - 160, 210);
+  ctx.lineTo(width / 2 - 30, 210);
+  ctx.moveTo(width / 2 + 30, 210);
+  ctx.lineTo(width / 2 + 160, 210);
+  ctx.stroke();
+
+  ctx.fillStyle = "#d4af37";
+  ctx.font = "20px 'Segoe UI Emoji', sans-serif";
+  ctx.fillText("♥", width / 2, 217);
+
+  // Section Subtitle
+  ctx.fillStyle = "rgba(243, 229, 171, 0.85)";
+  ctx.font = "500 19px 'Montserrat', sans-serif";
+  ctx.fillText("HEARTFELT BLESSINGS & WISHES", width / 2, 268);
+
+  // 4. Frosted Glass Wish Card Container
+  const boxX = 90;
+  const boxY = 310;
+  const boxW = width - 180;
+  const boxH = 700;
+  const radius = 24;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(boxX, boxY, boxW, boxH, radius);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.4)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  ctx.restore();
+
+  // Quotation Marks
+  ctx.fillStyle = "rgba(212, 175, 55, 0.28)";
+  ctx.font = "italic 110px 'Playfair Display', Georgia, serif";
+  ctx.fillText("“", boxX + 60, boxY + 100);
+
+  // 5. Draw Word-Wrapped Wish Content
+  const wishText = data.wish.trim();
+  let fontSize = 32;
+  let lineHeight = 48;
+  if (wishText.length > 250) {
+    fontSize = 24;
+    lineHeight = 36;
+  } else if (wishText.length > 140) {
+    fontSize = 28;
+    lineHeight = 42;
+  }
+
+  ctx.fillStyle = "#f8f5ee";
+  ctx.font = `italic ${fontSize}px 'Playfair Display', Georgia, serif`;
+
+  const maxTextWidth = boxW - 140;
+  const words = wishText.split(/\s+/);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxTextWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+
+  const maxAllowedLines = 9;
+  const displayLines = lines.slice(0, maxAllowedLines);
+  if (lines.length > maxAllowedLines) {
+    displayLines[maxAllowedLines - 1] += "...";
+  }
+
+  const textBlockHeight = displayLines.length * lineHeight;
+  const textStartY = boxY + 125 + Math.max(0, (330 - textBlockHeight) / 2);
+
+  displayLines.forEach((line, idx) => {
+    ctx.fillText(line, width / 2, textStartY + idx * lineHeight);
+  });
+
+  ctx.fillStyle = "rgba(212, 175, 55, 0.28)";
+  ctx.font = "italic 110px 'Playfair Display', Georgia, serif";
+  ctx.fillText("”", width - boxX - 60, boxY + 450);
+
+  // Inner Divider
+  ctx.strokeStyle = "rgba(212, 175, 55, 0.25)";
+  ctx.beginPath();
+  ctx.moveTo(width / 2 - 120, boxY + boxH - 180);
+  ctx.lineTo(width / 2 + 120, boxY + boxH - 180);
+  ctx.stroke();
+
+  // Guest Name Badge
+  ctx.fillStyle = "rgba(212, 175, 55, 0.75)";
+  ctx.font = "500 16px 'Montserrat', sans-serif";
+  ctx.fillText("WITH LOVE & PRAYERS FROM", width / 2, boxY + boxH - 130);
+
+  ctx.fillStyle = "#e5c365";
+  ctx.font = "600 36px 'Playfair Display', Georgia, serif";
+  ctx.fillText(data.name.trim(), width / 2, boxY + boxH - 75);
+
+  // 6. Footer (Date & Location watermark)
+  ctx.fillStyle = "rgba(212, 175, 55, 0.85)";
+  ctx.font = "600 17px 'Montserrat', sans-serif";
+  ctx.fillText("SUNDAY · 29 NOVEMBER 2026", width / 2, height - 155);
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.font = "16px 'Montserrat', sans-serif";
+  ctx.fillText("Zawaj Capitol, Kallekad, Palakkad", width / 2, height - 120);
+
+  ctx.fillStyle = "rgba(212, 175, 55, 0.4)";
+  ctx.font = "13px 'Montserrat', sans-serif";
+  ctx.fillText("ashik-weds-thasleema", width / 2, height - 85);
+
+  return canvas.toDataURL("image/png");
+}
+
+function Wishes() {
+  const [submittedData, setSubmittedData] = useState<{
+    name: string;
+    wish: string;
+    cardImageUrl?: string;
+    whatsappUrl: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    try { window.localStorage.setItem("ashik-thasleema-rsvp", JSON.stringify({ ...data, attending })); } catch { /* Confirmation still works when storage is unavailable. */ }
-    setSubmitted(true);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const name = String(formData.get("name") || "").trim();
+    const wish = String(formData.get("wish") || "").trim();
+
+    if (!name || !wish) return;
+
+    setLoading(true);
+    setErrorMessage(null);
+
+    try {
+      // 1. Save to Supabase 'wishes' table
+      const { error } = await supabase.from("wishes").insert([{ name, wish }]);
+
+      if (error) {
+        console.error("Supabase insert error:", error);
+        if (error.code === "PGRST205") {
+          console.warn(
+            "Supabase table 'wishes' does not exist yet. Please create it in your Supabase SQL editor."
+          );
+        }
+      }
+
+      // 2. LocalStorage backup / offline cache
+      try {
+        const existing = JSON.parse(
+          window.localStorage.getItem("ashik-thasleema-wishes") || "[]"
+        );
+        const updated = [
+          { name, wish, timestamp: new Date().toISOString() },
+          ...existing,
+        ];
+        window.localStorage.setItem(
+          "ashik-thasleema-wishes",
+          JSON.stringify(updated)
+        );
+      } catch {
+        /* Local storage fallback */
+      }
+
+      // 3. Generate beautiful visual wish card
+      const cardImageUrl = await generateWishCardImage({ name, wish });
+
+      // 4. WhatsApp share URL to +91 9633596679
+      const targetNumber = "919633596679";
+      const formattedMessage = [
+        `💍 *Wedding Wishes for Ashik & Thasleema* 💍`,
+        ``,
+        `👤 *From:* ${name}`,
+        `💌 *Wish:* "${wish}"`,
+        ``,
+        `✨ *Wedding Reception: 29 November 2026 · Zawaj Capitol, Kallekad* ✨`,
+      ].join("\n");
+
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetNumber}&text=${encodeURIComponent(formattedMessage)}`;
+
+      setSubmittedData({
+        name,
+        wish,
+        cardImageUrl,
+        whatsappUrl,
+      });
+    } catch (err: any) {
+      console.error("Error submitting wish:", err);
+      setErrorMessage(
+        "Could not send your wish. Please check your connection and try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
-    <section id="rsvp" className="section rsvp-section">
+    <section id="wishes" className="section rsvp-section wishes-section">
       <div className="section-inner narrow">
-        <SectionHeading eyebrow="Kindly respond">We Would Love to Celebrate With You</SectionHeading>
-        <p className="rsvp-intro">Your presence would make our celebration even more special.</p>
-        {submitted ? (
-          <div className="rsvp-success animate-scale-in" role="status"><Heart className="fill-current" /><h3>{attending === "yes" ? "We can’t wait to celebrate with you" : "You’ll be in our thoughts"}</h3><p>Thank you for letting us know.</p><Button variant="outline" onClick={() => setSubmitted(false)}>Update response</Button></div>
+        <SectionHeading eyebrow="Send Your Blessings">Wishes &amp; Blessings</SectionHeading>
+        <p className="rsvp-intro">Your warm wishes, prayers, and heartfelt blessings mean the world to us.</p>
+        {submittedData ? (
+          <div className="rsvp-success animate-scale-in" role="status">
+            <Heart className="fill-current text-gold mx-auto" />
+            <h3>Thank You, {submittedData.name}!</h3>
+            <p>Your heartfelt blessings have been received with deep love &amp; gratitude.</p>
+
+            {submittedData.cardImageUrl && (
+              <div className="wish-card-container">
+                <img
+                  src={submittedData.cardImageUrl}
+                  alt={`Wedding wish card from ${submittedData.name}`}
+                />
+              </div>
+            )}
+
+            <div className="wish-actions-group">
+              <a
+                href={submittedData.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="whatsapp-action-btn"
+              >
+                <MessageCircle /> Send to WhatsApp (+91 96335 96679)
+              </a>
+
+              {submittedData.cardImageUrl && (
+                <a
+                  href={submittedData.cardImageUrl}
+                  download={`wedding-wish-${submittedData.name.replace(/\s+/g, "-")}.png`}
+                  className="download-action-btn"
+                >
+                  <Download /> Download Wish Card
+                </a>
+              )}
+            </div>
+
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSubmittedData(null);
+                  setErrorMessage(null);
+                }}
+              >
+                Send Another Wish
+              </Button>
+            </div>
+          </div>
         ) : (
           <form className="rsvp-form reveal" onSubmit={submit}>
-            <label>Guest Name<Input name="name" required maxLength={100} placeholder="Your full name" /></label>
-            <label>Number of Guests<Input name="guests" type="number" required min={1} max={10} defaultValue={1} /></label>
-            <fieldset><legend>Will you be attending?</legend><div className="attending-choice"><button type="button" className={attending === "yes" ? "active" : ""} onClick={() => setAttending("yes")}><Heart /> Joyfully Accepting</button><button type="button" className={attending === "no" ? "active" : ""} onClick={() => setAttending("no")}><X /> Unable to Attend</button></div></fieldset>
-            <label>Message <span>(optional)</span><Textarea name="message" maxLength={500} rows={4} placeholder="Share a note for the couple" /></label>
-            <Button type="submit" size="lg" className="gold-button">Send RSVP <Heart /></Button>
+            {errorMessage && (
+              <div
+                className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md"
+                role="alert"
+              >
+                {errorMessage}
+              </div>
+            )}
+            <label>
+              Guest Name
+              <Input
+                name="name"
+                required
+                maxLength={100}
+                placeholder="Your full name"
+                disabled={loading}
+              />
+            </label>
+            <label>
+              Your Wish
+              <Textarea
+                name="wish"
+                required
+                maxLength={500}
+                rows={4}
+                placeholder="Share your heartfelt wishes or prayers for the couple..."
+                disabled={loading}
+              />
+            </label>
+            <Button
+              type="submit"
+              size="lg"
+              className="gold-button flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Sending Wishes...
+                </>
+              ) : (
+                <>
+                  Send Wishes <Heart />
+                </>
+              )}
+            </Button>
           </form>
         )}
       </div>
@@ -553,10 +892,10 @@ export function WeddingInvitation() {
       <Nikah />
       <Reception />
       <Timeline />
-      <VenueMap />
+      <LocationRouteMap />
       <Quote />
       <Gallery />
-      <RSVP />
+      <Wishes />
       <Footer />
       <MusicPlayer />
     </main>
